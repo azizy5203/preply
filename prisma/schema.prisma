@@ -201,7 +201,6 @@ model User {
   Session                                        Session[]
   TutorProfile                                   TutorProfile?
   favorites                                      Favorite[]
-  favorites                                      Favorite[]
 }
 
 model VerificationToken {
