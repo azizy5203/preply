@@ -82,7 +82,10 @@ model Favorite {
   studentId String
   tutorId   String
   createdAt DateTime @default(now())
-  User      User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student   User     @relation("FavoriteStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor     User     @relation("FavoriteTutor", fields: [tutorId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
 
   @@id([studentId, tutorId])
   @@index([studentId])
@@ -190,12 +193,15 @@ model User {
   Booking_Booking_tutorIdToUser                  Booking[]      @relation("Booking_tutorIdToUser")
   Conversation_Conversation_participant1IdToUser Conversation[] @relation("Conversation_participant1IdToUser")
   Conversation_Conversation_participant2IdToUser Conversation[] @relation("Conversation_participant2IdToUser")
-  Favorite                                       Favorite[]
+  favoritesGiven                                 Favorite[]     @relation("FavoriteStudent")
+  favoritesReceived                              Favorite[]     @relation("FavoriteTutor")
   Message                                        Message[]
   Review_Review_studentIdToUser                  Review[]       @relation("Review_studentIdToUser")
   Review_Review_tutorIdToUser                    Review[]       @relation("Review_tutorIdToUser")
   Session                                        Session[]
   TutorProfile                                   TutorProfile?
+  favorites                                      Favorite[]
+  favorites                                      Favorite[]
 }
 
 model VerificationToken {
