@@ -39,7 +39,10 @@ export function subscribeToMessages(conversationId: string, callback: (message: 
 }
 
 export function unsubscribeFromMessages(conversationId: string) {
-    supabase.removeChannel(`conversation:${conversationId}`);
+    const channel = supabase.getChannels().find(c => c.topic === `conversation:${conversationId}`);
+    if (channel) {
+        supabase.removeChannel(channel);
+    }
 }
 
 // Storage helpers
