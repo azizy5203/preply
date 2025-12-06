@@ -9,6 +9,7 @@ import {
   Award,
   TrendingUp,
 } from "lucide-react";
+import { Navbar } from "@/components/shared/Navbar";
 
 export default function HomePage() {
   const categories = [
@@ -73,39 +74,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-gray-200 sticky top-0 bg-white/95 backdrop-blur-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link
-              href="/"
-              className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Hussamly
-            </Link>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link
-                href="/tutors"
-                className="text-gray-700 hover:text-purple-600 transition">
-                Find Tutors
-              </Link>
-              <Link
-                href="/register"
-                className="text-gray-700 hover:text-purple-600 transition">
-                Become a Tutor
-              </Link>
-              <Link
-                href="/login"
-                className="text-gray-700 hover:text-purple-600 transition">
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition">
-                Get Started
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 py-20">

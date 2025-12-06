@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Navbar } from "@/components/shared/Navbar";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import {
@@ -46,25 +47,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link
-              href="/"
-              className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Hussamly
-            </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700">{session.user.name}</span>
-              <Link
-                href="/api/auth/signout"
-                className="text-gray-600 hover:text-gray-900">
-                <LogOut className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">

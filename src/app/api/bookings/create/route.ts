@@ -57,6 +57,17 @@ export async function POST(request: NextRequest) {
             },
         });
 
+        // Create notification for tutor
+        await prisma.notification.create({
+            data: {
+                userId: tutorId,
+                title: 'New Booking Request',
+                message: `You have a new booking request for ${new Date(dateTime).toLocaleString()}`,
+                type: 'BOOKING_REQUEST',
+                link: '/tutor/bookings',
+            },
+        });
+
         return NextResponse.json(booking, { status: 201 });
     } catch (error) {
         if (error instanceof z.ZodError) {

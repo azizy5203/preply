@@ -115,6 +115,20 @@ model Payment {
   booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model Review {
   id        String   @id @default(cuid())
   bookingId String   @unique
@@ -196,6 +210,7 @@ model User {
   favoritesGiven              Favorite[]     @relation("FavoriteStudent")
   favoritesReceived           Favorite[]     @relation("FavoriteTutor")
   messages                    Message[]
+  notifications               Notification[]
   reviewsGiven                Review[]       @relation("Review_studentIdToUser")
   reviewsReceived             Review[]       @relation("Review_tutorIdToUser")
   sessions                    Session[]
