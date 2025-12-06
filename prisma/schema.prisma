@@ -21,7 +21,7 @@ model Account {
   id_token          String?
   session_state     String?
   createdAt         DateTime @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime @updatedAt
   User              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
@@ -50,7 +50,7 @@ model Booking {
   totalPrice                   Float
   notes                        String?
   createdAt                    DateTime      @default(now())
-  updatedAt                    DateTime
+  updatedAt                    DateTime      @updatedAt
   User_Booking_studentIdToUser User          @relation("Booking_studentIdToUser", fields: [studentId], references: [id], onDelete: Cascade)
   User_Booking_tutorIdToUser   User          @relation("Booking_tutorIdToUser", fields: [tutorId], references: [id], onDelete: Cascade)
   TutorProfile                 TutorProfile  @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
@@ -68,7 +68,7 @@ model Conversation {
   participant2Id                         String
   lastMessageAt                          DateTime?
   createdAt                              DateTime  @default(now())
-  updatedAt                              DateTime
+  updatedAt                              DateTime  @updatedAt
   User_Conversation_participant1IdToUser User      @relation("Conversation_participant1IdToUser", fields: [participant1Id], references: [id], onDelete: Cascade)
   User_Conversation_participant2IdToUser User      @relation("Conversation_participant2IdToUser", fields: [participant2Id], references: [id], onDelete: Cascade)
   Message                                Message[]
@@ -120,7 +120,7 @@ model Review {
   rating                      Int
   comment                     String?
   createdAt                   DateTime @default(now())
-  updatedAt                   DateTime
+  updatedAt                   DateTime @updatedAt
   Booking                     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   User_Review_studentIdToUser User     @relation("Review_studentIdToUser", fields: [studentId], references: [id], onDelete: Cascade)
   User_Review_tutorIdToUser   User     @relation("Review_tutorIdToUser", fields: [tutorId], references: [id], onDelete: Cascade)
@@ -134,7 +134,7 @@ model Session {
   userId       String
   expires      DateTime
   createdAt    DateTime @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime @updatedAt
   User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -159,7 +159,7 @@ model TutorProfile {
   nationality       String?
   yearsOfExperience Int?
   createdAt         DateTime       @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime       @updatedAt
   Availability      Availability[]
   Booking           Booking[]
   User              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -184,7 +184,7 @@ model User {
   role                                           Role           @default(STUDENT)
   image                                          String?
   createdAt                                      DateTime       @default(now())
-  updatedAt                                      DateTime
+  updatedAt                                      DateTime       @updatedAt
   Account                                        Account[]
   Booking_Booking_studentIdToUser                Booking[]      @relation("Booking_studentIdToUser")
   Booking_Booking_tutorIdToUser                  Booking[]      @relation("Booking_tutorIdToUser")
