@@ -267,19 +267,35 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t bg-white p-4 space-y-4">
+        <div className="fixed inset-0 top-16 z-50 bg-white border-t p-4 space-y-4 md:hidden">
           <Link
             href="/tutors"
-            className="block text-sm font-medium text-gray-700 py-2"
+            className="block text-base font-medium text-gray-700 py-3 border-b border-gray-100"
             onClick={() => setIsMobileMenuOpen(false)}>
             Find Tutors
           </Link>
           <Link
             href="/become-tutor"
-            className="block text-sm font-medium text-gray-700 py-2"
+            className="block text-base font-medium text-gray-700 py-3 border-b border-gray-100"
             onClick={() => setIsMobileMenuOpen(false)}>
             Become a Tutor
           </Link>
+          {!session && (
+            <div className="pt-4 space-y-3">
+              <Link
+                href="/login"
+                className="block w-full text-center py-3 border border-gray-300 rounded-lg text-gray-700 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}>
+                Log in
+              </Link>
+              <Link
+                href="/register"
+                className="block w-full text-center py-3 bg-purple-600 text-white rounded-lg font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}>
+                Sign up
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </header>

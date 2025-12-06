@@ -310,9 +310,9 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Main Video Area */}
-        <div className="flex-1 p-4 flex gap-4 overflow-hidden relative">
+        <div className="flex-1 p-4 flex flex-col md:flex-row gap-4 overflow-hidden relative">
           {/* Remote Feed (Tutor) - Real Video */}
-          <div className="flex-1 bg-gray-800 rounded-xl overflow-hidden relative flex items-center justify-center">
+          <div className="flex-1 bg-gray-800 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[300px]">
             <video
               ref={remoteVideoRef}
               autoPlay
@@ -324,9 +324,9 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
 
             {/* Placeholder / Waiting State */}
             {remoteUsers.length === 0 && (
-              <div className="flex flex-col items-center text-gray-400 gap-3">
+              <div className="flex flex-col items-center text-gray-400 gap-3 p-4 text-center">
                 <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-                <span>Waiting for participant to join...</span>
+                <span>Waiting for participant...</span>
               </div>
             )}
 
@@ -340,7 +340,7 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
             )}
 
             {/* Self View (Local Stream) */}
-            <div className="absolute bottom-4 right-4 w-64 aspect-video bg-gray-900 rounded-lg border border-gray-700 shadow-xl overflow-hidden group z-10 transition-transform hover:scale-105">
+            <div className="absolute bottom-4 right-4 w-32 md:w-64 aspect-video bg-gray-900 rounded-lg border border-gray-700 shadow-xl overflow-hidden group z-10 transition-transform hover:scale-105">
               <video
                 ref={localVideoRef}
                 autoPlay
@@ -352,12 +352,12 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
               />
 
               {!cameraOn && (
-                <div className="w-full h-full flex items-center justify-center text-gray-500 font-medium bg-gray-800">
+                <div className="w-full h-full flex items-center justify-center text-gray-500 font-medium bg-gray-800 text-xs md:text-base">
                   Camera Off
                 </div>
               )}
 
-              <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-xs text-white">
+              <div className="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded text-[10px] md:text-xs text-white">
                 You {!micOn && "(Muted)"}
               </div>
             </div>

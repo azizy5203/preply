@@ -3,8 +3,11 @@ import { Star, Calendar, Clock, MessageSquare, Heart } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { notFound } from "next/navigation";
+import { Navbar } from "@/components/shared/Navbar";
+import { auth } from "@/lib/auth";
 
 async function getTutor(id: string) {
+  // ... (keep existing getTutor logic) ...
   const tutor = await prisma.user.findUnique({
     where: { id, role: "TUTOR" },
     include: {
@@ -56,6 +59,7 @@ export default async function TutorProfilePage({
 }) {
   const { id } = await params;
   const tutor = await getTutor(id);
+  const session = await auth();
 
   if (!tutor) {
     notFound();
@@ -66,29 +70,7 @@ export default async function TutorProfilePage({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link
-              href="/"
-              className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Hussamly
-            </Link>
-            <nav className="flex items-center space-x-6">
-              <Link
-                href="/tutors"
-                className="text-gray-700 hover:text-purple-600">
-                ← Back
-              </Link>
-              <Link
-                href="/login"
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-                Sign In to Book
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -259,7 +241,7 @@ export default async function TutorProfilePage({
                 </div>
 
                 <Link
-                  href="/login"
+                  href={session ? `/book/${tutor.id}` : "/login"}
                   className="block w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white text-center py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition mb-3">
                   Book Trial Lesson
                 </Link>

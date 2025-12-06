@@ -20,6 +20,11 @@ export async function middleware(request: NextRequest) {
 
     // Allow public routes
     if (isPublicRoute && pathname !== '/tutor' && pathname !== '/student') {
+        // Redirect logged-in users away from auth pages
+        if (session?.user && (pathname === '/login' || pathname === '/register')) {
+            const redirectUrl = session.user.role === 'TUTOR' ? '/tutor' : '/student';
+            return NextResponse.redirect(new URL(redirectUrl, request.url));
+        }
         return NextResponse.next();
     }
 
