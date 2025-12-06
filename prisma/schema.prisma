@@ -22,7 +22,7 @@ model Account {
   session_state     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
@@ -34,28 +34,28 @@ model Availability {
   startTime      String
   endTime        String
   createdAt      DateTime     @default(now())
-  TutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
 
   @@index([tutorProfileId])
 }
 
 model Booking {
-  id                           String        @id @default(cuid())
-  studentId                    String
-  tutorId                      String
-  tutorProfileId               String
-  dateTime                     DateTime
-  duration                     Int           @default(60)
-  status                       BookingStatus @default(PENDING)
-  totalPrice                   Float
-  notes                        String?
-  createdAt                    DateTime      @default(now())
-  updatedAt                    DateTime      @updatedAt
-  User_Booking_studentIdToUser User          @relation("Booking_studentIdToUser", fields: [studentId], references: [id], onDelete: Cascade)
-  User_Booking_tutorIdToUser   User          @relation("Booking_tutorIdToUser", fields: [tutorId], references: [id], onDelete: Cascade)
-  TutorProfile                 TutorProfile  @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  Payment                      Payment?
-  Review                       Review?
+  id             String        @id @default(cuid())
+  studentId      String
+  tutorId        String
+  tutorProfileId String
+  dateTime       DateTime
+  duration       Int           @default(60)
+  status         BookingStatus @default(PENDING)
+  totalPrice     Float
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  student        User          @relation("Booking_studentIdToUser", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor          User          @relation("Booking_tutorIdToUser", fields: [tutorId], references: [id], onDelete: Cascade)
+  tutorProfile   TutorProfile  @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  payment        Payment?
+  review         Review?
 
   @@index([dateTime])
   @@index([studentId])
@@ -63,15 +63,15 @@ model Booking {
 }
 
 model Conversation {
-  id                                     String    @id @default(cuid())
-  participant1Id                         String
-  participant2Id                         String
-  lastMessageAt                          DateTime?
-  createdAt                              DateTime  @default(now())
-  updatedAt                              DateTime  @updatedAt
-  User_Conversation_participant1IdToUser User      @relation("Conversation_participant1IdToUser", fields: [participant1Id], references: [id], onDelete: Cascade)
-  User_Conversation_participant2IdToUser User      @relation("Conversation_participant2IdToUser", fields: [participant2Id], references: [id], onDelete: Cascade)
-  Message                                Message[]
+  id             String    @id @default(cuid())
+  participant1Id String
+  participant2Id String
+  lastMessageAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  participant1   User      @relation("Conversation_participant1IdToUser", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2   User      @relation("Conversation_participant2IdToUser", fields: [participant2Id], references: [id], onDelete: Cascade)
+  messages       Message[]
 
   @@unique([participant1Id, participant2Id])
   @@index([participant1Id])
@@ -98,8 +98,8 @@ model Message {
   content        String
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
-  Conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  User           User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
   @@index([createdAt])
@@ -112,21 +112,21 @@ model Payment {
   status    String   @default("MOCK_SUCCESS")
   method    String   @default("MOCK")
   createdAt DateTime @default(now())
-  Booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 model Review {
-  id                          String   @id @default(cuid())
-  bookingId                   String   @unique
-  studentId                   String
-  tutorId                     String
-  rating                      Int
-  comment                     String?
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
-  Booking                     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  User_Review_studentIdToUser User     @relation("Review_studentIdToUser", fields: [studentId], references: [id], onDelete: Cascade)
-  User_Review_tutorIdToUser   User     @relation("Review_tutorIdToUser", fields: [tutorId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  studentId String
+  tutorId   String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  student   User     @relation("Review_studentIdToUser", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor     User     @relation("Review_tutorIdToUser", fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([tutorId])
@@ -138,16 +138,16 @@ model Session {
   expires      DateTime
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Subject {
-  id           String         @id @default(cuid())
-  name         String         @unique
-  slug         String         @unique
-  icon         String?
-  createdAt    DateTime       @default(now())
-  TutorSubject TutorSubject[]
+  id            String         @id @default(cuid())
+  name          String         @unique
+  slug          String         @unique
+  icon          String?
+  createdAt     DateTime       @default(now())
+  tutorSubjects TutorSubject[]
 }
 
 model TutorProfile {
@@ -163,9 +163,9 @@ model TutorProfile {
   yearsOfExperience Int?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
-  Availability      Availability[]
-  Booking           Booking[]
-  User              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability      Availability[]
+  bookings          Booking[]
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjects          TutorSubject[]
 }
 
@@ -180,27 +180,27 @@ model TutorSubject {
 }
 
 model User {
-  id                                             String         @id @default(cuid())
-  name                                           String
-  email                                          String         @unique
-  password                                       String
-  role                                           Role           @default(STUDENT)
-  image                                          String?
-  createdAt                                      DateTime       @default(now())
-  updatedAt                                      DateTime       @updatedAt
-  Account                                        Account[]
-  Booking_Booking_studentIdToUser                Booking[]      @relation("Booking_studentIdToUser")
-  Booking_Booking_tutorIdToUser                  Booking[]      @relation("Booking_tutorIdToUser")
-  Conversation_Conversation_participant1IdToUser Conversation[] @relation("Conversation_participant1IdToUser")
-  Conversation_Conversation_participant2IdToUser Conversation[] @relation("Conversation_participant2IdToUser")
-  favoritesGiven                                 Favorite[]     @relation("FavoriteStudent")
-  favoritesReceived                              Favorite[]     @relation("FavoriteTutor")
-  Message                                        Message[]
-  Review_Review_studentIdToUser                  Review[]       @relation("Review_studentIdToUser")
-  Review_Review_tutorIdToUser                    Review[]       @relation("Review_tutorIdToUser")
-  Session                                        Session[]
-  tutorProfile                                   TutorProfile?
-  favorites                                      Favorite[]
+  id                          String         @id @default(cuid())
+  name                        String
+  email                       String         @unique
+  password                    String
+  role                        Role           @default(STUDENT)
+  image                       String?
+  createdAt                   DateTime       @default(now())
+  updatedAt                   DateTime       @updatedAt
+  accounts                    Account[]
+  bookingsAsStudent           Booking[]      @relation("Booking_studentIdToUser")
+  bookingsAsTutor             Booking[]      @relation("Booking_tutorIdToUser")
+  conversationsAsParticipant1 Conversation[] @relation("Conversation_participant1IdToUser")
+  conversationsAsParticipant2 Conversation[] @relation("Conversation_participant2IdToUser")
+  favoritesGiven              Favorite[]     @relation("FavoriteStudent")
+  favoritesReceived           Favorite[]     @relation("FavoriteTutor")
+  messages                    Message[]
+  reviewsGiven                Review[]       @relation("Review_studentIdToUser")
+  reviewsReceived             Review[]       @relation("Review_tutorIdToUser")
+  sessions                    Session[]
+  tutorProfile                TutorProfile?
+  favorites                   Favorite[]
 }
 
 model VerificationToken {
