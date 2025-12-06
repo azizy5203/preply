@@ -24,17 +24,33 @@ interface LessonRoomProps {
   };
 }
 
+const STUN_SERVERS = {
+  iceServers: [
+    {
+      urls: [
+        "stun:stun.l.google.com:19302",
+        "stun:stun1.l.google.com:19302",
+        "stun:stun2.l.google.com:19302",
+      ],
+    },
+  ],
+};
+
 export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
   const router = useRouter();
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
   const [joined, setJoined] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
   const streamRef = useRef<MediaStream | null>(null);
+  const rtcConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const channelRef = useRef<any>(null);
 
   // Realtime state
-  const [channel, setChannel] = useState<any>(null);
   const [remoteUsers, setRemoteUsers] = useState<any[]>([]);
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
     []
@@ -71,18 +87,88 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
         });
 
         roomChannel
-          .on("presence", { event: "sync" }, () => {
+          .on("presence", { event: "sync" }, async () => {
             const newState = roomChannel.presenceState();
             const users = Object.values(newState).flat() as any[];
-            setRemoteUsers(users.filter((u) => u.userId !== currentUser.id));
+            const others = users.filter((u) => u.userId !== currentUser.id);
+            setRemoteUsers(others);
 
-            // If we have remote users, we are "joined/connected"
-            if (users.length > 1) {
+            // Simple signaling strategy: If I am the "host" (lower ID) and not connected, I initiate
+            if (others.length > 0) {
+              const targetUser = others[0]; // 1:1 for now
+
+              // Prevent duplicate connections or glare
+              // We only initiate if we are the "lower" ID to be deterministic
+              const isInitiator = currentUser.id < targetUser.userId;
+
+              if (isInitiator && !rtcConnectionRef.current) {
+                console.log("I am the initiator, starting call...");
+                await createPeerConnection(roomChannel);
+                const offer = await rtcConnectionRef.current!.createOffer();
+                await rtcConnectionRef.current!.setLocalDescription(offer);
+
+                await roomChannel.send({
+                  type: "broadcast",
+                  event: "signal",
+                  payload: {
+                    type: "offer",
+                    sdp: offer,
+                    senderId: currentUser.id,
+                  },
+                });
+              }
+            }
+
+            if (others.length > 0) {
               setJoined(true);
             }
           })
           .on("broadcast", { event: "chat" }, ({ payload }) => {
             setMessages((prev) => [...prev, payload]);
+          })
+          .on("broadcast", { event: "signal" }, async ({ payload }) => {
+            if (payload.senderId === currentUser.id) return; // Ignore own messages
+
+            // Initialize PeerConnection if not exists (for the receiver)
+            if (!rtcConnectionRef.current) {
+              await createPeerConnection(roomChannel);
+            }
+
+            const pc = rtcConnectionRef.current!;
+
+            if (payload.type === "offer") {
+              console.log("Received offer");
+              await pc.setRemoteDescription(
+                new RTCSessionDescription(payload.sdp)
+              );
+              const answer = await pc.createAnswer();
+              await pc.setLocalDescription(answer);
+
+              await roomChannel.send({
+                type: "broadcast",
+                event: "signal",
+                payload: {
+                  type: "answer",
+                  sdp: answer,
+                  senderId: currentUser.id,
+                },
+              });
+            } else if (payload.type === "answer") {
+              console.log("Received answer");
+              await pc.setRemoteDescription(
+                new RTCSessionDescription(payload.sdp)
+              );
+            } else if (payload.type === "ice-candidate") {
+              if (payload.candidate) {
+                try {
+                  await pc.addIceCandidate(
+                    new RTCIceCandidate(payload.candidate)
+                  );
+                } catch (e) {
+                  console.error("Error adding ice candidate", e);
+                }
+              }
+            }
           })
           .subscribe(async (status) => {
             if (status === "SUBSCRIBED") {
@@ -95,7 +181,7 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
             }
           });
 
-        setChannel(roomChannel);
+        channelRef.current = roomChannel;
       } catch (err: any) {
         console.error("Error accessing media devices:", err);
         setError(
@@ -111,12 +197,53 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
+      // Cleanup PC
+      if (rtcConnectionRef.current) {
+        rtcConnectionRef.current.close();
+      }
       // Cleanup channel
-      if (channel) {
-        supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
       }
     };
   }, [lessonId, currentUser]);
+
+  const createPeerConnection = async (channel: any) => {
+    if (rtcConnectionRef.current) return;
+
+    const pc = new RTCPeerConnection(STUN_SERVERS);
+
+    // Add local tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        pc.addTrack(track, streamRef.current!);
+      });
+    }
+
+    pc.onicecandidate = async (event) => {
+      if (event.candidate) {
+        await channel.send({
+          type: "broadcast",
+          event: "signal",
+          payload: {
+            type: "ice-candidate",
+            candidate: event.candidate,
+            senderId: currentUser.id,
+          },
+        });
+      }
+    };
+
+    pc.ontrack = (event) => {
+      console.log("Received remote track");
+      if (remoteVideoRef.current && event.streams[0]) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+
+    rtcConnectionRef.current = pc;
+    return pc;
+  };
 
   const toggleMic = () => {
     if (streamRef.current) {
@@ -144,12 +271,12 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !channel) return;
+    if (!newMessage.trim() || !channelRef.current) return;
 
     const payload = { sender: currentUser.name, text: newMessage };
 
     // Send to others
-    await channel.send({
+    await channelRef.current.send({
       type: "broadcast",
       event: "chat",
       payload,
@@ -184,41 +311,36 @@ export default function LessonRoom({ lessonId, currentUser }: LessonRoomProps) {
       <div className="flex-1 flex overflow-hidden">
         {/* Main Video Area */}
         <div className="flex-1 p-4 flex gap-4 overflow-hidden relative">
-          {/* Remote Feed (Tutor) - Placeholder for MVP */}
+          {/* Remote Feed (Tutor) - Real Video */}
           <div className="flex-1 bg-gray-800 rounded-xl overflow-hidden relative flex items-center justify-center">
-            {error ? (
-              <div className="text-red-400 p-4 text-center">
-                <p className="font-bold">Error</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            ) : remoteUsers.length > 0 ? (
-              <div className="text-center">
-                <div className="w-32 h-32 rounded-full bg-purple-900 mx-auto mb-6 flex items-center justify-center border-4 border-purple-500 overflow-hidden">
-                  {remoteUsers[0].image ? (
-                    <img
-                      src={remoteUsers[0].image}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-4xl font-bold">
-                      {remoteUsers[0].name[0]}
-                    </span>
-                  )}
-                </div>
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  {remoteUsers[0].name}
-                </h2>
-                <p className="text-gray-400">Connected</p>
-              </div>
-            ) : (
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className={`w-full h-full object-cover ${
+                remoteUsers.length === 0 ? "hidden" : ""
+              }`}
+            />
+
+            {/* Placeholder / Waiting State */}
+            {remoteUsers.length === 0 && (
               <div className="flex flex-col items-center text-gray-400 gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
                 <span>Waiting for participant to join...</span>
               </div>
             )}
 
+            {error && (
+              <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-20">
+                <div className="text-red-400 p-4 text-center">
+                  <p className="font-bold">Error</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+            )}
+
             {/* Self View (Local Stream) */}
-            <div className="absolute bottom-4 right-4 w-64 aspect-video bg-gray-900 rounded-lg border border-gray-700 shadow-xl overflow-hidden group z-10">
+            <div className="absolute bottom-4 right-4 w-64 aspect-video bg-gray-900 rounded-lg border border-gray-700 shadow-xl overflow-hidden group z-10 transition-transform hover:scale-105">
               <video
                 ref={localVideoRef}
                 autoPlay
