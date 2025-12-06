@@ -79,7 +79,9 @@ export async function PATCH(
                     title,
                     message,
                     type,
-                    link: isTutor ? `/tutor/bookings` : `/student/lessons`,
+                    link: isTutor
+                        ? `/tutor/bookings`
+                        : (status === 'CONFIRMED' ? `/lesson/${booking.id}` : `/student/lessons`),
                 }
             });
         }

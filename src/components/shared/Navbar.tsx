@@ -163,11 +163,21 @@ export function Navbar() {
                             <p className="text-sm text-gray-600 line-clamp-2">
                               {notification.message}
                             </p>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 block mt-1">
                               {new Date(
                                 notification.createdAt
                               ).toLocaleDateString()}
                             </span>
+                            {notification.link && (
+                              <Link
+                                href={notification.link}
+                                className="mt-2 inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transition-colors w-full"
+                                onClick={() => setIsMobileMenuOpen(false)}>
+                                {notification.link.includes("lesson")
+                                  ? "Join Meeting"
+                                  : "View Details"}
+                              </Link>
+                            )}
                           </DropdownMenuItem>
                         ))
                       )}

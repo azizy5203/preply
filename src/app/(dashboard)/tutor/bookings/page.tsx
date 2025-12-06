@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { BookingActions } from "@/components/tutor/BookingActions";
 
 async function getTutorBookings(userId: string) {
   const bookings = await prisma.booking.findMany({
@@ -95,6 +96,11 @@ export default async function TutorBookingsPage() {
                       }`}>
                       {booking.status}
                     </span>
+
+                    {booking.status === "PENDING" && (
+                      <BookingActions bookingId={booking.id} />
+                    )}
+
                     {booking.payment && (
                       <p className="text-xs text-gray-500 mt-2">
                         Payment: {booking.payment.status}
