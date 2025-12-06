@@ -90,7 +90,11 @@ export default function TutorsPage() {
   ).sort();
 
   const availableCountries = Array.from(
-    new Set(tutors.map((t) => t.tutorProfile?.nationality).filter(Boolean))
+    new Set(
+      tutors
+        .map((t) => t.tutorProfile?.nationality)
+        .filter((n): n is string => !!n)
+    )
   ).sort();
 
   const applyFilters = () => {
