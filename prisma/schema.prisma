@@ -166,7 +166,7 @@ model TutorProfile {
   Availability      Availability[]
   Booking           Booking[]
   User              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  TutorSubject      TutorSubject[]
+  subjects          TutorSubject[]
 }
 
 model TutorSubject {
