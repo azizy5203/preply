@@ -173,8 +173,8 @@ model TutorSubject {
   tutorProfileId String
   subjectId      String
   createdAt      DateTime     @default(now())
-  Subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  TutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject        Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
 
   @@id([tutorProfileId, subjectId])
 }
