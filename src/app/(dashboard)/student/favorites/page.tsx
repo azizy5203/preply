@@ -83,7 +83,7 @@ export default async function StudentFavoritesPage() {
 
             return (
               <div
-                key={favorite.id}
+                key={favorite.tutorId}
                 className="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition">
                 <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100 relative overflow-hidden">
                   {tutor.image ? (
