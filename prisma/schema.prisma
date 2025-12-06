@@ -199,7 +199,7 @@ model User {
   Review_Review_studentIdToUser                  Review[]       @relation("Review_studentIdToUser")
   Review_Review_tutorIdToUser                    Review[]       @relation("Review_tutorIdToUser")
   Session                                        Session[]
-  TutorProfile                                   TutorProfile?
+  tutorProfile                                   TutorProfile?
   favorites                                      Favorite[]
 }
 
