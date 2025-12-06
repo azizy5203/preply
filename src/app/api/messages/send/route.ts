@@ -30,6 +30,13 @@ export async function POST(request: NextRequest) {
             conversation = await prisma.conversation.findUnique({
                 where: { id: conversationId },
             });
+
+            if (!conversation) {
+                return NextResponse.json(
+                    { error: 'Conversation not found' },
+                    { status: 404 }
+                );
+            }
         } else {
             // Find or create conversation
             conversation = await prisma.conversation.findFirst({
