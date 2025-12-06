@@ -11,15 +11,18 @@ export const metadata: Metadata = {
   description: "Connect with expert tutors for personalized online lessons",
 };
 
-export default function RootLayout({
+import { auth } from "@/lib/auth";
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
+        <Providers session={session}>
           {children}
           <Toaster
             position="top-right"

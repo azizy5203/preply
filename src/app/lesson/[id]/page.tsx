@@ -5,8 +5,9 @@ import LessonRoom from "@/components/lesson/LessonRoom";
 export default async function LessonPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth();
 
   if (!session?.user) {
@@ -22,7 +23,7 @@ export default async function LessonPage({
 
   return (
     <LessonRoom
-      lessonId={params.id}
+      lessonId={id}
       currentUser={currentUser}
     />
   );
